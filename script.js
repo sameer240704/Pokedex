@@ -122,19 +122,46 @@ const pokemon = [
     }
 ]
 
-function typewriterTyping(element, text, index = 0) {
-    if(index === 0) {
-        element.textContent = "";
+let currentTimeoutName;
+let currentTimeoutType;
+
+function updateText(element, text, index, type) {
+    element.textContent = text.substring(0, index);
+    if (index < text.length) {
+
+        if(type=='name')
+        {
+            currentTimeoutName = setTimeout(() => {
+                updateText(element, text, index + 1, type);
+            }, 100); 
+        }
+        else{
+            currentTimeoutType = setTimeout(() => {
+                updateText(element, text, index + 1, type);
+            }, 100);
+        }
     }
-    if(index === text.length) {
-        return;
-    }
-    element.textContent += text[index];
-    if(index === text.length - 1) {
-        return;
-    }
-    setTimeout(() => typewriterTyping(element, text, index + 1), 400);
 }
+
+function typewriterTyping(element, text, type) {
+
+    if(type=='name'){
+        if (currentTimeoutName) {
+            clearTimeout(currentTimeoutName);
+        }
+    }
+    else
+    {
+        if (currentTimeoutType) {
+            clearTimeout(currentTimeoutType);
+        }
+    }
+
+    let textToDisplay =  type === 'name' ? text1 + text : text2 + text;
+
+    updateText(element, textToDisplay, 0, type);
+}
+
 
 window.addEventListener('mousemove', a => {
     cursor.style.top = a.pageY + 'px'
@@ -153,16 +180,22 @@ open_btn.addEventListener('click', () => {
     hinge2.classList.toggle('active');
     hinge3.classList.toggle('active');
     pokedex_sound.play();
-    typewriterTyping(display1, text1);
-    typewriterTyping(display2, text2);
+    typewriterTyping(display1, "", 'name');
+    typewriterTyping(display2,  "", 'type');
 });
 
 let pokemon_index = 0;
 
-function switchPokemon() {
+function sleep(ms)
+{
+    new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function switchPokemon() {
+    console.log("Inside the Pokemon");
     let currentPokemon = pokemon[pokemon_index];
-    typewriterTyping(display1, text1 + currentPokemon.name, 0);
-    typewriterTyping(display2, text2 + currentPokemon.type, 0);
+    typewriterTyping(display1, currentPokemon.name, 'name');
+    typewriterTyping(display2,  currentPokemon.type, 'type');
     pokemon_image.src = currentPokemon.image;
     pokedex_sound.src = currentPokemon.sound;
     pokedex_sound.play();
